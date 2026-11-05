@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KARTU BERANI BICARA & RODA PUTAR - Program BISA (SDN LOWOKWARU 5 MALANG)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Fredoka', 'sans-serif'],
+                        body: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        cat1: {
+                            bg: '#FFF3E0',
+                            border: '#FFB74D',
+                            badge: '#FF9800',
+                            text: '#E65100',
+                            accent: '#FFE0B2'
+                        },
+                        cat2: {
+                            bg: '#E8F5E9',
+                            border: '#81C784',
+                            badge: '#4CAF50',
+                            text: '#1B5E20',
+                            accent: '#C8E6C9'
+                        },
+                        cat3: {
+                            bg: '#E0F7FA',
+                            border: '#4DD0E1',
+                            badge: '#00ACC1',
+                            text: '#006064',
+                            accent: '#B2EBF2'
+                        },
+                        cat4: {
+                            bg: '#F3E5F5',
+                            border: '#BA68C8',
+                            badge: '#AB47BC',
+                            text: '#4A148C',
+                            accent: '#E1BEE7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Print settings */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-page {
+                page-break-after: always;
+                margin: 0 !important;
+                padding: 10mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                height: 100% !important;
+            }
+            .card-item, .print-wheel-item {
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+        }
+
+        .print-only {
+            display: none;
+        }
+
+        /* 3D Soft Clay Art styling with SVGs */
+        .clay-card {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.06), inset 0 -4px 6px rgba(0,0,0,0.04), inset 0 4px 6px rgba(255,255,255,0.8);
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .clay-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.12), inset 0 -4px 6px rgba(0,0,0,0.04), inset 0 4px 6px rgba(255,255,255,0.9);
+        }
+
+        .clay-btn {
+            box-shadow: 0 6px 0 #d97706, 0 10px 15px rgba(0,0,0,0.15);
+            transition: all 0.1s ease;
+        }
+        .clay-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d97706, 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Standard 9cm x 12cm aspect ratio layout scaling */
+        .card-dimension {
+            width: 9cm;
+            height: 12cm;
+        }
+
+        /* Crop marks styling */
+        .crop-mark-tl { position: absolute; top: -8px; left: -8px; width: 12px; height: 12px; border-top: 2px solid #94a3b8; border-left: 2px solid #94a3b8; }
+        .crop-mark-tr { position: absolute; top: -8px; right: -8px; width: 12px; height: 12px; border-top: 2px solid #94a3b8; border-right: 2px solid #94a3b8; }
+        .crop-mark-bl { position: absolute; bottom: -8px; left: -8px; width: 12px; height: 12px; border-bottom: 2px solid #94a3b8; border-left: 2px solid #94a3b8; }
+        .crop-mark-br { position: absolute; bottom: -8px; right: -8px; width: 12px; height: 12px; border-bottom: 2px solid #94a3b8; border-right: 2px solid #94a3b8; }
+
+        /* Wheel Spin Animation Container */
+        #wheelCanvas {
+            transition: transform 4s cubic-bezier(0.15, 0.99, 0.24, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-body text-slate-800 min-h-screen pb-16">
+
+    <!-- Header Navigation & Action Bar -->
+    <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-tr from-amber-400 to-rose-400 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-md transform -rotate-3">
+                    B!
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-2xl text-slate-800 leading-tight">KARTU & RODA BERANI BICARA</h1>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Program BISA • SDN LOWOKWARU 5 MALANG</p>
+                </div>
+            </div>
+
+            <!-- Filter & Mode Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="scrollToSection('wheelSection')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 font-display font-semibold px-4 py-2 rounded-xl border border-purple-300 transition flex items-center gap-1.5 text-sm">
+                    🎡 Roda Putar Kelas
+                </button>
+                <button onclick="scrollToSection('cardsSection')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-display font-semibold px-4 py-2 rounded-xl border border-amber-300 transition flex items-center gap-1.5 text-sm">
+                    🎴 25 Kartu Edukasi
+                </button>
+                <select id="categoryFilter" onchange="filterCategory(this.value)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <option value="all">✨ Semua Kategori (25 Kartu)</option>
+                    <option value="1">1. Kenali Dirimu (1-6)</option>
+                    <option value="2">2. Berani Bicara (7-12)</option>
+                    <option value="3">3. Berani Berpendapat (13-18)</option>
+                    <option value="4">4. Saling Apresiasi (19-25)</option>
+                </select>
+
+                <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-white font-display font-semibold px-4 py-2 rounded-xl shadow-md transition flex items-center gap-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Cetak Media (A4/A3)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Info Banner -->
+    <section class="no-print max-w-7xl mx-auto px-4 mt-6">
+        <div class="bg-gradient-to-r from-orange-100 via-teal-100 to-purple-100 p-6 rounded-3xl border border-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <h2 class="font-display font-bold text-xl text-slate-800">Spesifikasi Proyek Edukasi - SDN Lowokwaru 5 Malang</h2>
+                <p class="text-sm text-slate-600 mt-1">Kartu: <span class="font-bold">9 x 12 cm</span> (Total 25 Kartu) | Roda Putar Kelas: <span class="font-bold">Diameter 30cm+</span>. Siap cetak di Brief Card/Art Paper 260-300 gsm.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-200 text-amber-800">🟠 Kenali Dirimu</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-200 text-emerald-800">🟢 Berani Bicara</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-cyan-200 text-cyan-800">🔵  Berani Berpendapat</span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-200 text-purple-800">🟣 Saling Apresiasi</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE CLASSROOM WHEEL SPINNER SECTION -->
+    <section id="wheelSection" class="no-print max-w-7xl mx-auto px-4 mt-8">
+        <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm">
+            <div class="text-center max-w-2xl mx-auto mb-6">
+                <span class="bg-purple-100 text-purple-700 font-display font-extrabold text-xs px-3 py-1 rounded-full uppercase tracking-wider">Permainan Interaktif Kelas</span>
+                <h2 class="font-display font-bold text-2xl md:text-3xl text-slate-800 mt-2">RODA PUTAR BERANI BICARA</h2>
+                <p class="text-sm text-slate-500 mt-1">Putar roda untuk menentukan kategori tantangan secara acak! Siswa lalu mengambil/menjawab kartu sesuai kategori yang ditunjuk panah.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 my-4">
+                <!-- Wheel Canvas Container -->
+                <div class="relative w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 flex items-center justify-center">
+                    <!-- Top Pointer / Arrow -->
+                    <div class="absolute -top-4 z-30 w-0 h-0 border-l-[16px] border-l-transparent border-r-[16px] border-r-transparent border-t-[28px] border-t-rose-500 filter drop-shadow-md"></div>
+                    
+                    <!-- SVG Wheel Body -->
+                    <div id="wheelCanvas" class="w-full h-full rounded-full shadow-2xl border-4 border-white transition-transform">
+                        <svg viewBox="0 0 400 400" class="w-full h-full">
+                            <!-- Sector Slices (4 Sectors: 90deg each) -->
+                            <!-- Sector 1: 0deg to 90deg (Top-Right) -> KENALI DIRIMU (Orange) -->
+                            <path d="M 200 200 L 200 0 A 200 200 0 0 1 400 200 Z" fill="#FF9800"/>
+                            <!-- Sector 2: 90deg to 180deg (Bottom-Right) -> BERANI BICARA (Green) -->
+                            <path d="M 200 200 L 400 200 A 200 200 0 0 1 200 400 Z" fill="#4CAF50"/>
+                            <!-- Sector 3: 180deg to 270deg (Bottom-Left) -> BERANI BERPENDAPAT (Cyan) -->
+                            <path d="M 200 200 L 200 400 A 200 200 0 0 1 0 200 Z" fill="#00ACC1"/>
+                            <!-- Sector 4: 270deg to 360deg (Top-Left) -> SALING APRESIASI (Purple) -->
+                            <path d="M 200 200 L 0 200 A 200 200 0 0 1 200 0 Z" fill="#AB47BC"/>
+
+                            <!-- Inner Divider Lines & Outer Rim -->
+                            <circle cx="200" cy="200" r="196" fill="none" stroke="#FFFFFF" stroke-width="8"/>
+                            <line x1="200" y1="0" x2="200" y2="400" stroke="#FFFFFF" stroke-width="6"/>
+                            <line x1="0" y1="200" x2="400" y2="200" stroke="#FFFFFF" stroke-width="6"/>
+
+                            <!-- Category Labels properly oriented & easily readable -->
+                            <!-- Sector 1 (Top Right) -->
+                            <g transform="rotate(45, 200, 200)">
+                                <text x="285" y="195" fill="#FFFFFF" font-family="Fredoka" font-size="15" font-weight="bold" text-anchor="middle">1. KENALI DIRIMU 🟠</text>
+                            </g>
+                            <!-- Sector 2 (Bottom Right) -->
+                            <g transform="rotate(135, 200, 200)">
+                                <text x="285" y="195" fill="#FFFFFF" font-family="Fredoka" font-size="15" font-weight="bold" text-anchor="middle">2. BERANI BICARA 🟢</text>
+                            </g>
+                            <!-- Sector 3 (Bottom Left) -->
+                            <g transform="rotate(225, 200, 200)">
+                                <text x="285" y="195" fill="#FFFFFF" font-family="Fredoka" font-size="14" font-weight="bold" text-anchor="middle">3. BERPENDAPAT 🔵</text>
+                            </g>
+                            <!-- Sector 4 (Top Left) -->
+                            <g transform="rotate(315, 200, 200)">
+                                <text x="285" y="195" fill="#FFFFFF" font-family="Fredoka" font-size="14" font-weight="bold" text-anchor="middle">4. APRESIASI 🟣</text>
+                            </g>
+
+                            <!-- Decorative Dots for Clay Art Theme -->
+                            <circle cx="340" cy="80" r="7" fill="#FFE0B2"/>
+                            <circle cx="340" cy="320" r="7" fill="#C8E6C9"/>
+                            <circle cx="60" cy="320" r="7" fill="#B2EBF2"/>
+                            <circle cx="60" cy="80" r="7" fill="#E1BEE7"/>
+
+                            <!-- Center Cap -->
+                            <circle cx="200" cy="200" r="46" fill="#FFFFFF"/>
+                            <circle cx="200" cy="200" r="38" fill="#F8FAFC"/>
+                            <text x="200" y="206" fill="#475569" font-family="Fredoka" font-size="15" font-weight="bold" text-anchor="middle">BISA!</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Spin Control & Result Box -->
+                <div class="flex flex-col items-center md:items-start text-center md:text-left max-w-sm">
+                    <button id="spinBtn" onclick="spinWheel()" class="clay-btn bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-white font-display font-extrabold text-lg px-8 py-4 rounded-2xl transition transform">
+                        🎡 PUTAR RODA BISA!
+                    </button>
+                    
+                    <div id="wheelResultBox" class="mt-6 w-full p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col items-center md:items-start transition">
+                        <span class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Hasil Putaran Roda:</span>
+                        <h4 id="resultCategoryTitle" class="font-display font-bold text-lg text-slate-700 mt-1">Klik tombol di atas untuk memutar!</h4>
+                        <p id="resultCategoryDesc" class="text-xs text-slate-500 mt-1">Roda akan memilih secara acak 1 dari 4 kategori edukasi interaktif.</p>
+                        <button id="drawCardBtn" onclick="drawCardFromWheel()" class="mt-4 hidden bg-purple-600 hover:bg-purple-700 text-white font-display font-bold text-xs px-4 py-2.5 rounded-xl shadow transition">
+                            🎴 Ambil Kartu Kategori Ini!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRINTABLE WHEEL SHEET (PRINT ONLY SECTION) -->
+    <section class="print-only print-page">
+        <div class="text-center mb-4">
+            <h1 class="font-display font-bold text-2xl text-slate-800">MEDIA CETAK RODA PUTAR - PROGRAM BISA</h1>
+            <p class="text-xs font-bold text-purple-700">SDN LOWOKWARU 5 MALANG • KELAS V</p>
+            <p class="text-xs text-slate-600 mt-1">Gunting pola lingkaran di bawah ini dan pasang pada papan kayu/karton dengan pin poros di tengah.</p>
+        </div>
+        <div class="flex justify-center my-6">
+            <svg viewBox="0 0 400 400" class="w-[18cm] h-[18cm] border-2 stroke-slate-300">
+                <g>
+                    <path d="M 200 200 L 200 0 A 200 200 0 0 1 400 200 Z" fill="#FF9800"/>
+                    <path d="M 200 200 L 400 200 A 200 200 0 0 1 200 400 Z" fill="#4CAF50"/>
+                    <path d="M 200 200 L 200 400 A 200 200 0 0 1 0 200 Z" fill="#00ACC1"/>
+                    <path d="M 200 200 L 0 200 A 200 200 0 0 1 200 0 Z" fill="#AB47BC"/>
+                </g>
+                <circle cx="200" cy="200" r="198" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+                <line x1="200" y1="0" x2="200" y2="400" stroke="#FFFFFF" stroke-width="4"/>
+                <line x1="0" y1="200" x2="400" y2="200" stroke="#FFFFFF" stroke-width="4"/>
+                <g transform="rotate(45, 200, 200)">
+                    <text x="285" y="195" fill="#FFF" font-family="Fredoka" font-size="16" font-weight="bold" text-anchor="middle">1. KENALI DIRIMU</text>
+                </g>
+                <g transform="rotate(135, 200, 200)">
+                    <text x="285" y="195" fill="#FFF" font-family="Fredoka" font-size="16" font-weight="bold" text-anchor="middle">2. BERANI BICARA</text>
+                </g>
+                <g transform="rotate(225, 200, 200)">
+                    <text x="285" y="195" fill="#FFF" font-family="Fredoka" font-size="15" font-weight="bold" text-anchor="middle">3. BERANI BERPENDAPAT</text>
+                </g>
+                <g transform="rotate(315, 200, 200)">
+                    <text x="285" y="195" fill="#FFF" font-family="Fredoka" font-size="15" font-weight="bold" text-anchor="middle">4. SALING APRESIASI</text>
+                </g>
+                <circle cx="200" cy="200" r="30" fill="#FFFFFF"/>
+                <circle cx="200" cy="200" r="4" fill="#000000"/> <!-- Poros Tengah -->
+            </svg>
+        </div>
+        <!-- Pointer Cutout Cut -->
+        <div class="mt-4 flex items-center justify-around border-t pt-4">
+            <div>
+                <p class="text-xs font-bold text-slate-700">Gunting Panah Penunjuk:</p>
+                <div class="w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[40px] border-t-rose-500 my-2"></div>
+            </div>
+            <div class="text-xs text-slate-500 max-w-sm">
+                <p class="font-bold">Petunjuk Perakitan:</p>
+                <ol class="list-decimal pl-4">
+                    <li>Tempelkan hasil cetakan roda pada kertas karton tebal / impraboard.</li>
+                    <li>Gunting mengelilingi lingkaran luar.</li>
+                    <li>Pasang paku payung / pin berporos di titik pusat tengah.</li>
+                </ol>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cards Container / Layout Print Sheet -->
+    <main id="cardsSection" class="max-w-7xl mx-auto px-4 mt-8">
+        <div class="no-print flex items-center justify-between mb-4">
+            <h3 class="font-display font-bold text-xl text-slate-800">Koleksi 25 Kartu Berani Bicara (9 x 12 cm) - SDN Lowokwaru 5 Malang</h3>
+            <span class="text-xs text-slate-500 font-semibold">Klik kartu untuk pratinjau mode presentasi</span>
+        </div>
+
+        <!-- Cards Grid -->
+        <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center">
+            <!-- Cards JS Render Target -->
+        </div>
+    </main>
+
+    <!-- Detailed Modal View for Presentation / Drawn Card -->
+    <div id="cardModal" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl flex flex-col items-center relative">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 rounded-full p-2 text-slate-600 transition">
+                ✕
+            </button>
+            <span id="modalSourceBadge" class="font-display font-bold text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full mb-3">Pratinjau Kartu</span>
+            <div id="modalCardTarget" class="transform scale-105 my-2"></div>
+            <p class="text-xs text-slate-400 mt-4 text-center">Desain ini dirancang khusus untuk interaksi siswa kelas V SDN Lowokwaru 5 Malang dalam kegiatan proyek Program BISA.</p>
+        </div>
+    </div>
+
+    <!-- Script to Generate All 25 Unique Cards & Wheel Interaction -->
+    <script>
+        // 25 Unique Cards Data Set
+        const cardsData = [
+            // KATEGORI 1: KENALI DIRIMU (Cards 1-6)
+            {
+                id: 1,
+                category: 1,
+                catName: "1. KENALI DIRIMU",
+                question: "Apa hal yang paling kamu sukai dari dirimu sendiri?",
+                theme: "cat1",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#FFE0B2"/><circle cx="50" cy="38" r="22" fill="#FFB74D"/><circle cx="43" cy="35" r="3" fill="#37474F"/><circle cx="57" cy="35" r="3" fill="#37474F"/><path d="M 44 44 Q 50 50 56 44" stroke="#37474F" stroke-width="2.5" fill="none" stroke-linecap="round"/><circle cx="38" cy="40" r="4" fill="#FF8A65" opacity="0.6"/><circle cx="62" cy="40" r="4" fill="#FF8A65" opacity="0.6"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#FF9800"/><polygon points="80,20 83,28 92,28 85,33 87,41 80,36 73,41 75,33 68,28 77,28" fill="#FFD54F"/></svg>`
+            },
+            {
+                id: 2,
+                category: 1,
+                catName: "1. KENALI DIRIMU",
+                question: "Sebutkan 3 hobi yang membuatmu sangat gembira!",
+                theme: "cat1",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#FFE0B2"/><circle cx="50" cy="40" r="20" fill="#FFB74D"/><circle cx="42" cy="36" r="3" fill="#37474F"/><circle cx="58" cy="36" r="3" fill="#37474F"/><circle cx="49" cy="45" r="4" fill="#37474F"/><path d="M 30 85 C 30 68 70 68 70 85 Z" fill="#FF9800"/><circle cx="22" cy="30" r="12" fill="#FFD54F"/><circle cx="78" cy="35" r="10" fill="#81D4FA"/></svg>`
+            },
+            {
+                id: 3,
+                category: 1,
+                catName: "1. KENALI DIRIMU",
+                question: "Apa cita-cita terbesarmu saat kamu dewasa nanti?",
+                theme: "cat1",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#FFE0B2"/><circle cx="50" cy="42" r="20" fill="#FFB74D"/><circle cx="43" cy="39" r="3" fill="#37474F"/><circle cx="57" cy="39" r="3" fill="#37474F"/><path d="M 45 47 Q 50 52 55 47" stroke="#37474F" stroke-width="2.5" fill="none"/><path d="M 75 15 L 85 30 L 70 30 Z" fill="#FF7043"/><rect x="73" y="30" width="9" height="12" fill="#E0E0E0"/><path d="M 30 85 C 30 68 70 68 70 85 Z" fill="#FF9800"/></svg>`
+            },
+            {
+                id: 4,
+                category: 1,
+                catName: "1. KENALI DIRIMU",
+                question: "Apa bakat atau keahlian terselubung yang kamu miliki?",
+                theme: "cat1",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#FFE0B2"/><circle cx="50" cy="38" r="21" fill="#FFB74D"/><circle cx="43" cy="35" r="3" fill="#37474F"/><circle cx="57" cy="35" r="3" fill="#37474F"/><path d="M 42 43 Q 50 50 58 43" stroke="#37474F" stroke-width="2.5" fill="none"/><polygon points="50,8 55,18 65,12 60,22 70,26 58,28 50,38 42,28 30,26 40,22 35,12 45,18" fill="#FFD54F"/><path d="M 30 85 C 30 65 70 65 70 85 Z" fill="#FF9800"/></svg>`
+            },
+            {
+                id: 5,
+                category: 1,
+                catName: "1. KENALI DIRIMU",
+                question: "Bagaimana cara terbaikmu saat menenangkan diri kala sedih?",
+                theme: "cat1",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#FFE0B2"/><circle cx="50" cy="38" r="20" fill="#FFB74D"/><path d="M 40 36 Q 44 33 48 36" stroke="#37474F" stroke-width="2" fill="none"/><path d="M 52 36 Q 56 33 60 36" stroke="#37474F" stroke-width="2" fill="none"/><path d="M 44 47 Q 50 43 56 47" stroke="#37474F" stroke-width="2" fill="none"/><path d="M 75 25 C 75 18 85 18 85 25 C 85 32 75 38 75 38 C 75 38 65 32 65 25 C 65 18 75 18 75 25 Z" fill="#EF5350"/><path d="M 30 85 C 30 65 70 65 70 85 Z" fill="#FF9800"/></svg>`
+            },
+            {
+                id: 6,
+                category: 1,
+                catName: "1. KENALI DIRIMU",
+                question: "Mata pelajaran apa yang paling kamu sukai di SDN Lowokwaru 5 Malang dan mengapa?",
+                theme: "cat1",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#FFE0B2"/><circle cx="50" cy="38" r="21" fill="#FFB74D"/><circle cx="43" cy="35" r="3" fill="#37474F"/><circle cx="57" cy="35" r="3" fill="#37474F"/><path d="M 44 44 Q 50 50 56 44" stroke="#37474F" stroke-width="2.5" fill="none"/><rect x="70" y="20" width="16" height="22" rx="3" fill="#4FC3F7"/><line x1="74" y1="26" x2="82" y2="26" stroke="#FFF" stroke-width="2"/><line x1="74" y1="31" x2="82" y2="31" stroke="#FFF" stroke-width="2"/><path d="M 30 85 C 30 65 70 65 70 85 Z" fill="#FF9800"/></svg>`
+            },
+
+            // KATEGORI 2: BERANI BICARA (Cards 7-12)
+            {
+                id: 7,
+                category: 2,
+                catName: "2. BERANI BICARA",
+                question: "Ceritakan pengalaman paling menyenangkan di sekolah!",
+                theme: "cat2",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#C8E6C9"/><circle cx="50" cy="38" r="22" fill="#81C784"/><circle cx="43" cy="35" r="3" fill="#1B5E20"/><circle cx="57" cy="35" r="3" fill="#1B5E20"/><path d="M 42 42 Q 50 56 58 42 Z" fill="#1B5E20"/><rect x="62" y="15" width="30" height="20" rx="6" fill="#FFF" stroke="#4CAF50" stroke-width="2"/><text x="77" y="29" font-size="10" font-family="Fredoka" fill="#1B5E20" text-anchor="middle">Halo!</text><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#4CAF50"/></svg>`
+            },
+            {
+                id: 8,
+                category: 2,
+                catName: "2. BERANI BICARA",
+                question: "Perkenalkan nama lengkap dan arti namamu dengan tegas!",
+                theme: "cat2",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#C8E6C9"/><circle cx="50" cy="38" r="21" fill="#81C784"/><circle cx="43" cy="35" r="3.5" fill="#1B5E20"/><circle cx="57" cy="35" r="3.5" fill="#1B5E20"/><path d="M 44 45 Q 50 52 56 45" stroke="#1B5E20" stroke-width="2.5" fill="none"/><path d="M 15 25 L 30 20 L 30 40 L 15 35 Z" fill="#FF7043"/><path d="M 30 20 L 40 12 L 40 48 L 30 40 Z" fill="#FFB74D"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#4CAF50"/></svg>`
+            },
+            {
+                id: 9,
+                category: 2,
+                catName: "2. BERANI BICARA",
+                question: "Ceritakan tempat wisata atau tempat favorit yang pernah kamu kunjungi!",
+                theme: "cat2",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#C8E6C9"/><circle cx="50" cy="38" r="20" fill="#81C784"/><circle cx="43" cy="35" r="3" fill="#1B5E20"/><circle cx="57" cy="35" r="3" fill="#1B5E20"/><path d="M 43 44 Q 50 50 57 44" stroke="#1B5E20" stroke-width="2.5" fill="none"/><circle cx="80" cy="20" r="8" fill="#FFD54F"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#4CAF50"/></svg>`
+            },
+            {
+                id: 10,
+                category: 2,
+                catName: "2. BERANI BICARA",
+                question: "Ceritakan tentang hewan peliharaan impianmu dan alasannya!",
+                theme: "cat2",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#C8E6C9"/><circle cx="50" cy="38" r="20" fill="#81C784"/><circle cx="43" cy="35" r="3" fill="#1B5E20"/><circle cx="57" cy="35" r="3" fill="#1B5E20"/><path d="M 45 44 Q 50 49 55 44" stroke="#1B5E20" stroke-width="2.5" fill="none"/><circle cx="78" cy="28" r="6" fill="#FF7043"/><circle cx="70" cy="20" r="2.5" fill="#FF7043"/><circle cx="77" cy="17" r="2.5" fill="#FF7043"/><circle cx="85" cy="20" r="2.5" fill="#FF7043"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#4CAF50"/></svg>`
+            },
+            {
+                id: 11,
+                category: 2,
+                catName: "2. BERANI BICARA",
+                question: "Ceritakan momen ketika kamu berhasil mengatasi rasa takutmu!",
+                theme: "cat2",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#C8E6C9"/><circle cx="50" cy="38" r="21" fill="#81C784"/><circle cx="42" cy="34" r="3" fill="#1B5E20"/><circle cx="58" cy="34" r="3" fill="#1B5E20"/><path d="M 43 43 Q 50 53 57 43" stroke="#1B5E20" stroke-width="2.5" fill="none"/><path d="M 20 20 L 32 15 L 44 20 L 44 32 C 44 40 32 46 32 46 C 32 46 20 40 20 32 Z" fill="#FFB74D"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#4CAF50"/></svg>`
+            },
+            {
+                id: 12,
+                category: 2,
+                catName: "2. BERANI BICARA",
+                question: "Ceritakan tentang masakan atau jajanan kesukaanmu di Malang!",
+                theme: "cat2",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#C8E6C9"/><circle cx="50" cy="38" r="20" fill="#81C784"/><circle cx="43" cy="35" r="3" fill="#1B5E20"/><circle cx="57" cy="35" r="3" fill="#1B5E20"/><path d="M 43 44 Q 50 52 57 44" stroke="#1B5E20" stroke-width="2.5" fill="none"/><circle cx="78" cy="26" r="10" fill="#FFB74D"/><path d="M 72 32 Q 78 36 84 32" stroke="#E65100" stroke-width="2" fill="none"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#4CAF50"/></svg>`
+            },
+
+            // KATEGORI 3: BERANI BERPENDAPAT (Cards 13-18)
+            {
+                id: 13,
+                category: 3,
+                catName: "3. BERANI BERPENDAPAT",
+                question: "Jika kamu menjadi ketua kelas V, apa yang ingin kamu lakukan?",
+                theme: "cat3",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#B2EBF2"/><circle cx="50" cy="38" r="22" fill="#4DD0E1"/><circle cx="43" cy="35" r="3" fill="#006064"/><circle cx="57" cy="35" r="3" fill="#006064"/><path d="M 43 45 Q 50 52 57 45" stroke="#006064" stroke-width="2.5" fill="none"/><path d="M 75 25 C 75 18 85 18 85 25 C 85 29 82 32 80 34 L 80 38 L 70 38 L 70 34 C 68 32 65 29 65 25 Z" fill="#FFD54F"/><rect x="72" y="39" width="6" height="3" fill="#90A4AE"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#00ACC1"/></svg>`
+            },
+            {
+                id: 14,
+                category: 3,
+                catName: "3. BERANI BERPENDAPAT",
+                question: "Bagaimana cara membuat kelas kita di SDN Lowokwaru 5 Malang lebih bersih dan nyaman?",
+                theme: "cat3",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#B2EBF2"/><circle cx="50" cy="38" r="20" fill="#4DD0E1"/><circle cx="43" cy="35" r="3" fill="#006064"/><circle cx="57" cy="35" r="3" fill="#006064"/><path d="M 44 44 Q 50 49 56 44" stroke="#006064" stroke-width="2.5" fill="none"/><path d="M 78 35 C 65 35 65 20 78 20 C 90 20 90 35 78 35 Z" fill="#81C784"/><path d="M 78 35 L 78 45" stroke="#1B5E20" stroke-width="2"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#00ACC1"/></svg>`
+            },
+            {
+                id: 15,
+                category: 3,
+                catName: "3. BERANI BERPENDAPAT",
+                question: "Apa pendapatmu tentang pentingnya piket bersama di sekolah?",
+                theme: "cat3",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#B2EBF2"/><circle cx="50" cy="38" r="21" fill="#4DD0E1"/><circle cx="42" cy="35" r="3" fill="#006064"/><circle cx="58" cy="35" r="3" fill="#006064"/><path d="M 44 45 Q 50 50 56 45" stroke="#006064" stroke-width="2.5" fill="none"/><circle cx="20" cy="30" r="8" fill="#FFB74D"/><circle cx="80" cy="30" r="8" fill="#FFB74D"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#00ACC1"/></svg>`
+            },
+            {
+                id: 16,
+                category: 3,
+                catName: "3. BERANI BERPENDAPAT",
+                question: "Jika temanmu berbuat kurang jujur saat ujian, apa tindakan yang kamu pilih?",
+                theme: "cat3",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#B2EBF2"/><circle cx="50" cy="38" r="20" fill="#4DD0E1"/><circle cx="43" cy="34" r="3" fill="#006064"/><circle cx="57" cy="34" r="3" fill="#006064"/><path d="M 45 44 H 55" stroke="#006064" stroke-width="2.5" stroke-linecap="round"/><circle cx="78" cy="25" r="12" fill="#FFF"/><text x="78" y="30" font-size="14" font-family="Fredoka" font-weight="bold" fill="#006064" text-anchor="middle">?</text><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#00ACC1"/></svg>`
+            },
+            {
+                id: 17,
+                category: 3,
+                catName: "3. BERANI BERPENDAPAT",
+                question: "Mengapa kita tidak boleh membeda-bedakan teman di sekolah?",
+                theme: "cat3",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#B2EBF2"/><circle cx="50" cy="38" r="20" fill="#4DD0E1"/><circle cx="43" cy="35" r="3" fill="#006064"/><circle cx="57" cy="35" r="3" fill="#006064"/><path d="M 44 44 Q 50 51 56 44" stroke="#006064" stroke-width="2.5" fill="none"/><rect x="70" y="20" width="16" height="4" rx="2" fill="#FF7043"/><rect x="70" y="28" width="16" height="4" rx="2" fill="#FF7043"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#00ACC1"/></svg>`
+            },
+            {
+                id: 18,
+                category: 3,
+                catName: "3. BERANI BERPENDAPAT",
+                question: "Apa usulmu agar kegiatan olahraga di sekolah lebih seru?",
+                theme: "cat3",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#B2EBF2"/><circle cx="50" cy="38" r="20" fill="#4DD0E1"/><circle cx="43" cy="35" r="3" fill="#006064"/><circle cx="57" cy="35" r="3" fill="#006064"/><path d="M 43 45 Q 50 52 57 45" stroke="#006064" stroke-width="2.5" fill="none"/><circle cx="78" cy="25" r="9" fill="#FF7043"/><path d="M 72 25 H 84 M 78 19 V 31" stroke="#FFF" stroke-width="2"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#00ACC1"/></svg>`
+            },
+
+            // KATEGORI 4: SALING APRESIASI (Cards 19-25)
+            {
+                id: 19,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Sebutkan satu kelebihan hebat teman yang ada di sebelahmu!",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="22" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 43 43 Q 50 53 57 43" stroke="#4A148C" stroke-width="2.5" fill="none"/><path d="M 75 35 L 75 25 C 75 22 72 20 70 22 C 68 24 68 28 68 28 L 65 30 L 65 42 L 78 42 C 80 42 82 40 82 38 C 82 37 81 36 80 35 Z" fill="#FFD54F"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            },
+            {
+                id: 20,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Apa yang akan kamu lakukan jika melihat teman sedang sendirian?",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="21" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 44 44 Q 50 50 56 44" stroke="#4A148C" stroke-width="2.5" fill="none"/><path d="M 25 25 C 25 18 35 18 35 25 C 35 32 25 38 25 38 C 25 38 15 32 15 25 C 15 18 25 18 25 25 Z" fill="#EC407A"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            },
+            {
+                id: 21,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Ucapkan terima kasih dan pujian tulus kepada salah satu guru di sekolah!",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="20" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 43 45 Q 50 52 57 45" stroke="#4A148C" stroke-width="2.5" fill="none"/><circle cx="80" cy="22" r="6" fill="#FF7043"/><circle cx="70" cy="25" r="5" fill="#FFD54F"/><circle cx="85" cy="32" r="5" fill="#4DD0E1"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            },
+            {
+                id: 22,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Beri tepuk tangan dan sampaikan semangat untuk kawan sebangkumu!",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="21" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 42 42 Q 50 54 58 42 Z" fill="#4A148C"/><polygon points="75,15 80,22 88,20 83,28 88,34 79,34 75,41 72,34 64,32 70,27 67,19" fill="#FFD54F"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            },
+            {
+                id: 23,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Ceritakan perbuatan baik temanmu yang paling kamu ingat hingga sekarang!",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="20" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 44 44 Q 50 51 56 44" stroke="#4A148C" stroke-width="2.5" fill="none"/><path d="M 70 18 H 86 V 28 C 86 33 80 36 78 36 C 76 36 70 33 70 28 Z" fill="#FFD54F"/><rect x="76" y="36" width="4" height="6" fill="#FFA000"/><rect x="72" y="42" width="12" height="3" fill="#37474F"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            },
+            {
+                id: 24,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Apa hal positif dari diri kawanmu yang ingin kamu teladani?",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="21" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 44 44 Q 50 51 56 44" stroke="#4A148C" stroke-width="2.5" fill="none"/><polygon points="78,16 81,24 89,24 83,29 85,37 78,32 71,37 73,29 67,24 75,24" fill="#FFD54F"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            },
+            {
+                id: 25,
+                category: 4,
+                catName: "4. SALING APRESIASI",
+                question: "Sampaikan salam hangat dan kata-kata positif untuk seluruh teman kelas V!",
+                theme: "cat4",
+                icon: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="45" fill="#E1BEE7"/><circle cx="50" cy="38" r="20" fill="#BA68C8"/><circle cx="43" cy="35" r="3" fill="#4A148C"/><circle cx="57" cy="35" r="3" fill="#4A148C"/><path d="M 42 42 Q 50 54 58 42 Z" fill="#4A148C"/><path d="M 18 30 C 18 24 25 24 25 30 C 25 35 18 39 18 39 C 18 39 11 35 11 30 C 11 24 18 24 18 30 Z" fill="#EC407A"/><path d="M 82 30 C 82 24 89 24 89 30 C 89 35 82 39 82 39 C 82 39 75 35 75 30 C 75 24 82 24 82 30 Z" fill="#EC407A"/><path d="M 28 85 C 28 65 72 65 72 85 Z" fill="#AB47BC"/></svg>`
+            }
+        ];
+
+        // Global State for Wheel
+        let currentRotation = 0;
+        let isSpinning = false;
+        let activeLandedCategory = null;
+
+        // Function to create standard Card HTML string
+        function createCardElement(card) {
+            const themeClasses = {
+                cat1: {
+                    bg: 'bg-[#FFF3E0]',
+                    border: 'border-[#FFB74D]',
+                    badge: 'bg-[#FF9800]',
+                    text: 'text-[#E65100]',
+                    cardBorder: 'border-amber-300'
+                },
+                cat2: {
+                    bg: 'bg-[#E8F5E9]',
+                    border: 'border-[#81C784]',
+                    badge: 'bg-[#4CAF50]',
+                    text: 'text-[#1B5E20]',
+                    cardBorder: 'border-emerald-300'
+                },
+                cat3: {
+                    bg: 'bg-[#E0F7FA]',
+                    border: 'border-[#4DD0E1]',
+                    badge: 'bg-[#00ACC1]',
+                    text: 'text-[#006064]',
+                    cardBorder: 'border-cyan-300'
+                },
+                cat4: {
+                    bg: 'bg-[#F3E5F5]',
+                    border: 'border-[#BA68C8]',
+                    badge: 'bg-[#AB47BC]',
+                    text: 'text-[#4A148C]',
+                    cardBorder: 'border-purple-300'
+                }
+            };
+
+            const style = themeClasses[card.theme];
+
+            return `
+                <div class="relative card-dimension ${style.bg} rounded-[28px] border-4 ${style.border} p-4 flex flex-col justify-between items-center text-center shadow-lg clay-card cursor-pointer select-none card-item overflow-hidden" onclick="openModal(${card.id})">
+                    <!-- Crop Marks for Print Cut Precision -->
+                    <div class="crop-mark-tl"></div>
+                    <div class="crop-mark-tr"></div>
+                    <div class="crop-mark-bl"></div>
+                    <div class="crop-mark-br"></div>
+
+                    <!-- Category Badge (Top) -->
+                    <div class="w-full flex items-center justify-between z-10">
+                        <span class="${style.badge} text-white font-display font-bold text-[11px] px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">
+                            ${card.catName}
+                        </span>
+                        <span class="font-display font-black text-xs ${style.text} opacity-60">#${card.id < 10 ? '0' + card.id : card.id}</span>
+                    </div>
+
+                    <!-- 3D Clay Art Illustration (Center) -->
+                    <div class="w-28 h-28 my-auto relative flex items-center justify-center transform hover:scale-105 transition">
+                        ${card.icon}
+                    </div>
+
+                    <!-- Question & Challenge Container (Bottom) -->
+                    <div class="w-full bg-white/90 backdrop-blur-sm rounded-2xl p-3 border ${style.cardBorder} shadow-sm z-10 flex items-center justify-center min-h-[90px]">
+                        <p class="font-body font-extrabold text-xs leading-relaxed text-slate-800">
+                            "${card.question}"
+                        </p>
+                    </div>
+
+                    <!-- Program BISA & SDN LOWOKWARU 5 MALANG Branding Tag Footer -->
+                    <div class="w-full mt-2 pt-1 border-t border-slate-300/50 flex items-center justify-between text-[8px] font-display font-bold text-slate-500 uppercase tracking-wider">
+                        <span>BISA • KELAS V</span>
+                        <span>SDN LOWOKWARU 5 MALANG</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render All Cards
+        function renderCards(filter = 'all') {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+
+            const filteredData = filter === 'all' 
+                ? cardsData 
+                : cardsData.filter(c => c.category === parseInt(filter));
+
+            filteredData.forEach(card => {
+                grid.innerHTML += createCardElement(card);
+            });
+        }
+
+        // Filter Category Function
+        function filterCategory(catId) {
+            renderCards(catId);
+        }
+
+        // Scroll Helper
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Spin Wheel Function with Accurate Angle Calculation
+        function spinWheel() {
+            if (isSpinning) return;
+
+            isSpinning = true;
+            const spinBtn = document.getElementById('spinBtn');
+            const drawBtn = document.getElementById('drawCardBtn');
+            spinBtn.disabled = true;
+            spinBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            drawBtn.classList.add('hidden');
+
+            const resultTitle = document.getElementById('resultCategoryTitle');
+            const resultDesc = document.getElementById('resultCategoryDesc');
+            resultTitle.textContent = "Sedang Memutar Roda...";
+            resultDesc.textContent = "Tunggu hingga roda berhenti pada salah satu warna kategori!";
+
+            // Spin multi-turns (5 full turns = 1800 deg + random angle offset)
+            const randomExtraDeg = Math.floor(Math.random() * 360);
+            const totalDegrees = 1800 + randomExtraDeg;
+            currentRotation += totalDegrees;
+
+            const wheelCanvas = document.getElementById('wheelCanvas');
+            wheelCanvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                spinBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                // Pointer is at Top (12 o'clock, which corresponds to 270 deg in standard SVG coordinates)
+                // Normalize rotation angle [0, 360)
+                const normalizedRotation = currentRotation % 360;
+                // Calculate which sector lands directly under the top pointer
+                const pointerAngle = (270 - normalizedRotation + 360) % 360;
+
+                // Sector Mapping based on pointerAngle:
+                // 0° - 90°   : Sector 1 (Kenali Dirimu - Orange)
+                // 90° - 180°  : Sector 2 (Berani Bicara - Green)
+                // 180° - 270° : Sector 3 (Berani Berpendapat - Cyan)
+                // 270° - 360° : Sector 4 (Saling Apresiasi - Purple)
+                let catNum = 1;
+                if (pointerAngle >= 0 && pointerAngle < 90) {
+                    catNum = 1;
+                } else if (pointerAngle >= 90 && pointerAngle < 180) {
+                    catNum = 2;
+                } else if (pointerAngle >= 180 && pointerAngle < 270) {
+                    catNum = 3;
+                } else {
+                    catNum = 4;
+                }
+
+                activeLandedCategory = catNum;
+
+                const categoryMap = {
+                    1: { name: "🟠 Kategori 1: KENALI DIRIMU", color: "#E65100", desc: "Pertanyaan seputar pengenalan potensi diri, hobi, dan cita-cita!" },
+                    2: { name: "🟢 Kategori 2: BERANI BICARA", color: "#1B5E20", desc: "Tantangan menceritakan pengalaman & berinteraksi percaya diri!" },
+                    3: { name: "🔵 Kategori 3: BERANI BERPENDAPAT", color: "#006064", desc: "Pertanyaan seputar menyampaikan ide dan pemikiran kritis!" },
+                    4: { name: "🟣 Kategori 4: SALING APRESIASI", color: "#4A148C", desc: "Tantangan memberikan pujian dan empati kepada teman!" }
+                };
+
+                const catInfo = categoryMap[catNum];
+                resultTitle.textContent = catInfo.name;
+                resultTitle.style.color = catInfo.color;
+                resultDesc.textContent = catInfo.desc;
+
+                drawBtn.classList.remove('hidden');
+            }, 4000);
+        }
+
+        // Draw Card Randomly from Landed Category
+        function drawCardFromWheel() {
+            if (!activeLandedCategory) return;
+            const categoryCards = cardsData.filter(c => c.category === activeLandedCategory);
+            const randomCard = categoryCards[Math.floor(Math.random() * categoryCards.length)];
+            openModal(randomCard.id, true);
+        }
+
+        // Modal View Handler
+        function openModal(cardId, isFromWheel = false) {
+            const card = cardsData.find(c => c.id === cardId);
+            if (!card) return;
+
+            const modal = document.getElementById('cardModal');
+            const target = document.getElementById('modalCardTarget');
+            const badge = document.getElementById('modalSourceBadge');
+
+            badge.textContent = isFromWheel ? "🎉 Kartu Terpilih Dari Roda Putar!" : "Pratinjau Kartu Edukasi";
+            target.innerHTML = createCardElement(card);
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('cardModal').classList.add('hidden');
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            renderCards('all');
+        }
+    </script>
+</body>
+</html>
